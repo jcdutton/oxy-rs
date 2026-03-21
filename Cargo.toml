@@ -1,0 +1,53 @@
+[package]
+name = "oxy_ble"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "oxylib"
+path = "src/oxylib.rs"
+crate-type = ["dylib", "rlib"]
+
+[[getfiles]]
+name = "oxygetfiles"
+path = "src/bin/oxygetfiles.rs"
+
+[[synctime]]
+name = "oxysynctime"
+path = "src/bin/oxysynctime.rs"
+
+[[getinfo]]
+name = "oxygetinfo"
+path = "src/bin/oxygetinfo.rs"
+
+[[getppg]]
+name = "oxygetppg"
+path = "src/bin/oxygetppg.rs"
+
+[[getrt]]
+name = "oxygetrt"
+path = "src/bin/oxygetrt.rs"
+
+[[getrtwave]]
+name = "oxygetrtwave"
+path = "src/bin/oxygetrtwave.rs"
+
+[dependencies]
+btleplug = "0.11"
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+log = "0.4"
+env_logger = "0.10"
+chrono = "0.4"
+clap = { version = "4", features = ["derive"] }
+uuid = "1.22.0"
+futures-util = "0.3.32"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+csv = "1.4.0"
+plotters = "0.3.7"
+
+[lints.rust]
+warnings = "allow"
+
+

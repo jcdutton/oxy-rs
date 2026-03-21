@@ -1,0 +1,11 @@
+# .cargo/config.toml
+#[build]
+#rustflags = ["-C", "prefer-dynamic"]
+
+# This applies ONLY when building for Linux
+#[target.x86_64-unknown-linux-gnu]
+#rustflags = ["-C", "link-arg=-Wl,-rpath,$ORIGIN"]
+
+# This applies ONLY when building for macOS
+#[target.x86_64-apple-darwin]
+#rustflags = ["-C", "link-arg=-Wl,-rpath,@executable_path"]
