@@ -641,7 +641,7 @@ pub async fn get_rt_param(state: &mut AppState, peripheral: &Peripheral, write_c
 
 
 pub async fn get_rt_wave(state: &mut AppState, peripheral: &Peripheral, write_char: &Characteristic, notification_stream_ref: &mut Pin<Box<dyn Stream<Item = ValueNotification> + Send>>,
-     buf2: &mut Vec<u8>
+     buf2: &mut Vec<u8>, spo2: &mut u8, hr: &mut u8
     ) -> Result<(), Box<dyn Error>> {
 
     // Send request
@@ -678,7 +678,7 @@ pub async fn get_rt_wave(state: &mut AppState, peripheral: &Peripheral, write_ch
         println!("get_rt_wave: CRC failed");
         return Err("CRC failed".into());
     } else {
-        println!("get_rt_wave: CRC Ok");
+        //println!("get_rt_wave: CRC Ok");
     }
 
     if buf1.len() == 0 {
@@ -689,6 +689,9 @@ pub async fn get_rt_wave(state: &mut AppState, peripheral: &Peripheral, write_ch
         println!("get_rt_wave: Read file size failed");
         return Err("Read file size failed".into());
     }
+    println!("buf1: {:#?}", buf1);
+    *spo2 = buf1[7];
+    *hr = buf1[8];
     let mut bytes_len1: [u8; 2] = [0u8; 2];
     bytes_len1[0] = buf1[17];
     bytes_len1[1] = buf1[18];

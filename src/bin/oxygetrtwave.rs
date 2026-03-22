@@ -146,7 +146,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Output file and size
     let out_file = "line_plot.png";
-    let root = BitMapBackend::new(out_file, (800, 480)).into_drawing_area();
+    let root = BitMapBackend::new(out_file, (1600, 960)).into_drawing_area();
     root.fill(&WHITE)?;
 
     // Determine x and y ranges
@@ -205,9 +205,12 @@ async fn run_device_loop(peripheral: &Peripheral, state: &mut AppState, contents
     let mut result1: Result<(), Box<dyn Error>>  = Ok(());
     let mut filenames1: Vec<String> = Vec::new();
     let mut file_contents1: Vec<u8> = Vec::new();
+    
     buf1.clear();
     for i in 0..50 {
-        let result3 = get_rt_wave(state, peripheral, write_char, &mut notification_stream, &mut buf1).await?;
+        let mut spo2: u8 = 0;
+        let mut hr: u8 = 0;
+        let result3 = get_rt_wave(state, peripheral, write_char, &mut notification_stream, &mut buf1, &mut spo2, &mut hr).await?;
         sleep(Duration::from_millis(500)).await;
     };
     contents1.clear();

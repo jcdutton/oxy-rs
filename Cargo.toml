@@ -32,6 +32,10 @@ path = "src/bin/oxygetrt.rs"
 name = "oxygetrtwave"
 path = "src/bin/oxygetrtwave.rs"
 
+[[scroll]]
+name = "oxyscroll"
+path = "src/bin/oxyscroll.rs"
+
 [dependencies]
 btleplug = "0.11"
 tokio = { version = "1", features = ["full"] }
@@ -46,6 +50,8 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 csv = "1.4.0"
 plotters = "0.3.7"
+eframe = "0.27"
+egui_plot = "0.27"
 
 [lints.rust]
 warnings = "allow"
