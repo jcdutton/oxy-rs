@@ -689,7 +689,7 @@ pub async fn get_rt_wave(state: &mut AppState, peripheral: &Peripheral, write_ch
         println!("get_rt_wave: Read file size failed");
         return Err("Read file size failed".into());
     }
-    println!("buf1: {:#?}", buf1);
+    //println!("buf1: {:#?}", buf1);
     *spo2 = buf1[7];
     *hr = buf1[8];
     let mut bytes_len1: [u8; 2] = [0u8; 2];
