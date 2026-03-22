@@ -15,7 +15,7 @@ use uuid::Uuid;
 use oxylib::*; // Assuming this provides AppState, get_rt_wave, etc.
 
 #[derive(Parser, Debug, Clone)]
-#[command(author, version, about = "Viatom BLE Reader in Rust")]
+#[command(author, version, about = "OXY BLE Reader in Rust")]
 struct Args {
     #[arg(short, long, default_value = "E6:8E:31:3E:50:10")]
     address: String,
@@ -77,12 +77,12 @@ impl eframe::App for BlePlotApp {
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Viatom Live Monitor");
+            ui.heading("OXY Live Monitor");
 
             // Graph Section
             let line = Line::new(PlotPoints::new(self.data.clone().into()));
             Plot::new("rt_wave_plot")
-                .view_aspect(2.5)
+                .view_aspect(10.0)
                 .show(ui, |plot_ui| plot_ui.line(line));
 
             ui.add_space(10.0);
@@ -139,7 +139,7 @@ fn main() -> Result<(), eframe::Error> {
     };
     
     eframe::run_native(
-        "Viatom Real-time Graph",
+        "OXY Real-time Graph",
         options,
         Box::new(|_cc| Box::new(BlePlotApp::new(rx))), // Remove Result wrapping for eframe 0.27
     )
