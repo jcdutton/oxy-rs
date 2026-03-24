@@ -501,6 +501,10 @@ pub async fn get_ppg(state: &mut AppState, peripheral: &Peripheral, write_char: 
         peripheral.write(write_char, &chunk, WriteType::WithResponse).await?;
     }
     let mut result1 = wait_for_notifications(notification_stream_ref, &mut buf1, 1).await;
+    if buf1.len() == 0 {
+        println!("get_ppg: PPG Read failed");
+        return Err("PPG Read failed".into());
+    }
     let crc1 = cal_crc8(&buf1);
     if crc1 != buf1[buf1.len() - 1] {
         println!("get_ppg: CRC failed");
@@ -509,10 +513,6 @@ pub async fn get_ppg(state: &mut AppState, peripheral: &Peripheral, write_char: 
         println!("get_ppg: file_start: CRC Ok");
     }
 
-    if buf1.len() == 0 {
-        println!("get_ppg: Read file size failed");
-        return Err("Read file size failed".into());
-    }
     if buf1[1] == 1 {
         println!("get_ppg: Read file size failed");
         return Err("Read file size failed".into());
