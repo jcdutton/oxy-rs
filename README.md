@@ -16,4 +16,4 @@ It is probably a good idea to run "oxysynctime" just before going to sleep each 
 3) Then import then new .dat files into OSCAR.
 
 
-
+Note: Although the "oxygetppg" command exists. I have not managed to get it to work yet. The data request packet is not yet crafted correctly or the Wrist O2 sensor I have does not support it.
