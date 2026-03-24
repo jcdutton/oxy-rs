@@ -1,4 +1,5 @@
-# oxy-rs
+# oxy-rs 
+Copyright 2026 jcdutton
 
 This is a program written in rust to pull the data files from SpO2 and Heartrate wrist monitors such as the:
 1) Viatom Checkme O2 - ViATOM Bluetooth Pulse Oximeter with Alarm,Wrist Blood Oxygen Saturation
