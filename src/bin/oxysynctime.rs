@@ -2,6 +2,7 @@ use btleplug::api::{Central, Manager as _, Peripheral as _, ScanFilter, WriteTyp
 use btleplug::platform::{Manager, Peripheral};
 use btleplug::api::ValueNotification;
 use chrono::Local;
+use chrono::Utc;
 use clap::Parser;
 use std::error::Error;
 use std::time::Duration;
@@ -118,7 +119,7 @@ async fn run_device_loop(peripheral: &Peripheral, state: &mut AppState) -> Resul
     let result1 = get_info_buf_to_json(&mut buf1, &mut json3);
 
     let result2 = get_info_json_to_files(&mut json3, &mut filenames1);
-    let time_string1 = Local::now().format("%Y-%m-%d,%H:%M:%S").to_string();
+    let time_string1 = Utc::now().format("%Y-%m-%d,%H:%M:%S").to_string();
     println!("Time: {}", time_string1);
     let result3 = sync_time(state, peripheral, write_char, &mut notification_stream, &time_string1).await?;
 
