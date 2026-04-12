@@ -134,7 +134,7 @@ fn main() -> Result<(), eframe::Error> {
 
     // Start the eframe GUI on the main thread
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([800.0, 600.0]),
+        viewport: egui::ViewportBuilder::default().with_inner_size([2400.0, 400.0]),
         ..Default::default()
     };
     
@@ -224,7 +224,6 @@ async fn run_device_loop(
         
         // Fetch new data via oxylib
         get_rt_wave(state, peripheral, write_char, &mut notification_stream, &mut buf1, &mut spo2, &mut hr).await?;
-        
         if !buf1.is_empty() {
             // Apply your sensor fixup logic locally to the incoming chunk
             apply_sensor_fixups(&mut buf1);

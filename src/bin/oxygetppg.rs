@@ -110,8 +110,9 @@ async fn run_device_loop(peripheral: &Peripheral, state: &mut AppState) -> Resul
     let mut result1: Result<(), Box<dyn Error>>  = Ok(());
     let mut filenames1: Vec<String> = Vec::new();
     let mut file_contents1: Vec<u8> = Vec::new();
+    println!("get_ppg"); 
     let result3 = get_ppg(state, peripheral, write_char, &mut notification_stream).await?;
-
+    println!("PPG ERROR: {:#?}", result3);
     Ok(())
 }
 

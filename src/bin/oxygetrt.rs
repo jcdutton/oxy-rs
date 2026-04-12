@@ -110,7 +110,12 @@ async fn run_device_loop(peripheral: &Peripheral, state: &mut AppState) -> Resul
     let mut result1: Result<(), Box<dyn Error>>  = Ok(());
     let mut filenames1: Vec<String> = Vec::new();
     let mut file_contents1: Vec<u8> = Vec::new();
-    let result3 = get_rt_param(state, peripheral, write_char, &mut notification_stream).await?;
+    let mut spo2: u8 = 0;
+    let mut hr: u8 = 0;
+    let mut movement: u8 = 0;
+
+    let result3 = get_rt_param(state, peripheral, write_char, &mut notification_stream, &mut spo2, &mut hr, &mut movement).await?;
+    println!("SPO2: {}, HR: {} Movement: {}", spo2, hr, movement);
 
     Ok(())
 }

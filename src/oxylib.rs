@@ -557,84 +557,56 @@ pub async fn get_ppg(state: &mut AppState, peripheral: &Peripheral, write_char: 
 }
 
 pub async fn get_rt_param(state: &mut AppState, peripheral: &Peripheral, write_char: &Characteristic, notification_stream_ref: &mut Pin<Box<dyn Stream<Item = ValueNotification> + Send>>,
+    spo2: &mut u8, hr: &mut u8, movement: &mut u8
     ) -> Result<(), Box<dyn Error>> {
 
     // Send request
-    let mut ir1: Vec<i32> = Vec::new();
-    let mut red1: Vec<i32> = Vec::new();
-    let mut motion1: Vec<i32> = Vec::new();
     let mut buf1: Vec<u8> = Vec::new();
-    let mut write_bytes_get_ppg: Vec<u8> = Vec::new();
+    let mut write_bytes_get_rt_param: Vec<u8> = Vec::new();
     let mut bytes1: Vec<u8> = vec![1];
     let len = 0;
     // Expand it to size 8 filled with zeros
-    write_bytes_get_ppg.resize(7 + len + 1, 0);
-    write_bytes_get_ppg[0] = 0xAA;
-    write_bytes_get_ppg[1] = OXY_CMD_RT_PARAM;
-    write_bytes_get_ppg[2] = !OXY_CMD_RT_PARAM; // Invert the bits.
-    write_bytes_get_ppg[3] = 0x0;
-    write_bytes_get_ppg[4] = 0x0;
-    write_bytes_get_ppg[5] = ((len) & 0xff) as u8;
-    write_bytes_get_ppg[6] = ((len) >> 8) as u8;
-    write_bytes_get_ppg[7] = 1;
+    write_bytes_get_rt_param.resize(7 + len + 1, 0);
+    write_bytes_get_rt_param[0] = 0xAA;
+    write_bytes_get_rt_param[1] = OXY_CMD_RT_PARAM;
+    write_bytes_get_rt_param[2] = !OXY_CMD_RT_PARAM; // Invert the bits.
+    write_bytes_get_rt_param[3] = 0x0;
+    write_bytes_get_rt_param[4] = 0x0;
+    write_bytes_get_rt_param[5] = ((len) & 0xff) as u8;
+    write_bytes_get_rt_param[6] = ((len) >> 8) as u8;
+    write_bytes_get_rt_param[7] = 1;
     let crc_offset = 7 + len ;
-    write_bytes_get_ppg[crc_offset] = cal_crc8(&write_bytes_get_ppg);
+    write_bytes_get_rt_param[crc_offset] = cal_crc8(&write_bytes_get_rt_param);
     
     let seqNo: u32 = 1;
     let mtu = 20;
-    for chunk in write_bytes_get_ppg.chunks(mtu) {
+    for chunk in write_bytes_get_rt_param.chunks(mtu) {
         peripheral.write(write_char, &chunk, WriteType::WithResponse).await?;
     }
 
     let mut result1 = wait_for_notifications(notification_stream_ref, &mut buf1, 1).await;
+
     let crc1 = cal_crc8(&buf1);
     if crc1 != buf1[buf1.len() - 1] {
         println!("get_rt_param: CRC failed");
         return Err("CRC failed".into());
     } else {
-        println!("get_rt_param: file_start: CRC Ok");
+        println!("get_rt_param: CRC Ok");
     }
 
     if buf1.len() == 0 {
-        println!("get_rt_param: Read file size failed");
-        return Err("Read file size failed".into());
+        println!("get_rt_param: Read size failed");
+        return Err("Read size failed".into());
     }
     if buf1[1] == 1 {
-        println!("get_rt_param: Read file size failed");
-        return Err("Read file size failed".into());
+        println!("get_rt_param: Read size failed");
+        return Err("Read size failed".into());
     }
     let mut off1 = 7;
     let mut i1 = 0;
-    let mut bytes_ir1: [u8; 4] = [0u8; 4];
-    let mut bytes_red1: [u8; 4] = [0u8; 4];
-    let mut bytes_motion1: [u8; 1] = [0u8; 1];
-
-    loop {
-	off1 = (i1 * 9) + 11;
-	if off1 >= buf1.len() {
-            break;
-	}
-	// 4 bytes
-	bytes_ir1[0] = buf1[off1];
-	bytes_ir1[1] = buf1[off1 + 1];
-	bytes_ir1[2] = buf1[off1 + 2];
-	bytes_ir1[3] = buf1[off1 + 3];
-	// 4 bytes
-	bytes_red1[0] = buf1[off1 + 4];
-	bytes_red1[1] = buf1[off1 + 5];
-	bytes_red1[2] = buf1[off1 + 6];
-	bytes_red1[3] = buf1[off1 + 7];
-	// 1 bytes
-	bytes_motion1[0] = buf1[off1 + 8];
-	
-	let mut ir2:i32 = u32::from_le_bytes(bytes_ir1) as i32;
-	let mut red2:i32 = u32::from_le_bytes(bytes_red1) as i32;
-	let mut motion2:i32 = u8::from_le_bytes(bytes_motion1) as i32;
-	ir1.push(ir2);
-	red1.push(red2);
-	motion1.push(motion2);
-	i1 += 1;
-    }
+    *spo2 = buf1[7];
+    *hr = buf1[8];
+    *movement = buf1[16];
 
     Ok(())
 }
