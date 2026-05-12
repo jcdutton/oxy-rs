@@ -48,6 +48,7 @@ pub struct Info {
 pub const OXY_CMD_READ_START: u8 = 0x03;
 pub const OXY_CMD_READ_CONTENT: u8 = 0x04;
 pub const OXY_CMD_READ_END: u8 = 0x05;
+pub const OXY_CMD_LIST_START: u8 = 0x07;
 pub const OXY_CMD_INFO: u8 = 0x14;
 pub const OXY_CMD_PING: u8 = 0x15;
 pub const OXY_CMD_PARA_SYNC: u8 = 0x16;
@@ -470,7 +471,7 @@ pub async fn sync_time(state: &mut AppState, peripheral: &Peripheral, write_char
     Ok(())
 }
 
-
+// get_ppg does not work yet.
 pub async fn get_ppg(state: &mut AppState, peripheral: &Peripheral, write_char: &Characteristic, notification_stream_ref: &mut Pin<Box<dyn Stream<Item = ValueNotification> + Send>>,
     ) -> Result<(), Box<dyn Error>> {
 
@@ -487,16 +488,20 @@ pub async fn get_ppg(state: &mut AppState, peripheral: &Peripheral, write_char: 
     write_bytes_get_ppg[0] = 0xAA;
     write_bytes_get_ppg[1] = OXY_CMD_PPG_RT_DATA;
     write_bytes_get_ppg[2] = !OXY_CMD_PPG_RT_DATA; // Invert the bits.
+    //write_bytes_get_ppg[1] = OXY_CMD_BOX_INFO;
+    //write_bytes_get_ppg[2] = !OXY_CMD_BOX_INFO; // Invert the bits.
     write_bytes_get_ppg[3] = 0x0;
     write_bytes_get_ppg[4] = 0x0;
     write_bytes_get_ppg[5] = ((len) & 0xff) as u8;
     write_bytes_get_ppg[6] = ((len) >> 8) as u8;
     write_bytes_get_ppg[7] = 1;
+    //write_bytes_get_ppg[7] = 0;
     let crc_offset = 7 + len ;
     write_bytes_get_ppg[crc_offset] = cal_crc8(&write_bytes_get_ppg);
     
     let seqNo: u32 = 1;
     let mtu = 20;
+    println!("Request bytes: {:#?}", write_bytes_get_ppg);
     for chunk in write_bytes_get_ppg.chunks(mtu) {
         peripheral.write(write_char, &chunk, WriteType::WithResponse).await?;
     }

@@ -11,6 +11,7 @@ use std::sync::mpsc::{channel, Receiver, Sender};
 use std::time::Duration;
 use tokio::time::sleep;
 use uuid::Uuid;
+use std::fs::File;
 
 use oxylib::*; // Assuming this provides AppState, get_rt_wave, etc.
 
@@ -40,10 +41,14 @@ struct BleDataPacket {
 struct BlePlotApp {
     rx: Receiver<BleDataPacket>, // Updated type
     data: VecDeque<[f64; 2]>,
+    data2: Vec<[f64; 2]>,
     current_x: f64,
     window_size: usize,
     latest_spo2: u8,
     latest_hr: u8,
+    count1: f64,
+    wtr: Option<csv::Writer::<File>>,
+    is_init_done: u32,
 }
 
 impl BlePlotApp {
@@ -51,12 +56,24 @@ impl BlePlotApp {
         Self {
             rx,
             data: VecDeque::with_capacity(1000),
+            data2: Vec::new(),
             current_x: 0.0,
             window_size: 1000,
             latest_spo2: 0,
             latest_hr: 0,
-        }
+            count1: 0.0,
+            wtr: None,
+            is_init_done: 0,
+	}
     }
+}
+
+#[derive(serde::Serialize, Debug)]
+struct Record_Out {
+    spo2: u32,
+    hr: u32,
+    x: f64,
+    val: f64
 }
 
 impl eframe::App for BlePlotApp {
@@ -69,7 +86,9 @@ impl eframe::App for BlePlotApp {
             // Update waveform
             for val in packet.waveform {
                 self.data.push_back([self.current_x, val as f64]);
+                self.data2.push([self.count1, val as f64]);
                 self.current_x += 1.0;
+                self.count1 += 1.0;
                 if self.data.len() > self.window_size {
                     self.data.pop_front();
                 }
@@ -108,13 +127,44 @@ impl eframe::App for BlePlotApp {
         });
 
         ctx.request_repaint();
+	if (self.is_init_done == 0) {
+            let file_fd_res = File::create("output1.csv");
+            let file_fd = file_fd_res.unwrap();
+            let mut wtr = csv::WriterBuilder::new()
+                .has_headers(false) // Don't write headers again
+                .from_writer(file_fd);
+            self.wtr = Some(wtr);
+            self.is_init_done = 1;
+        }
+
+	let mut rec1 = Box::new(Record_Out {
+            spo2: 0,
+            hr: 0,
+            x: 0.0,
+            val: 0.0,
+        });
+	//for line1 in self.data.clone() {
+        for line1 in &self.data2 {
+	    rec1.spo2 = self.latest_spo2 as u32;
+	    rec1.hr = self.latest_hr as u32;
+	    rec1.x = line1[0];
+	    rec1.val = line1[1];
+	    //println!("{:#?}", line1);
+	    //println!("{:#?}", rec1);
+            if let Some(wtr1) = &self.wtr {
+	        self.wtr.as_mut().unwrap().serialize(&rec1);
+            } else {
+                // Skip writing if the file never opened.
+            }
+	};
+        self.data2.clear();
     }
 }
 
 // ----------------------------------------------------------------------------
 // Main function (Setup GUI & spawn BLE thread)
 // ----------------------------------------------------------------------------
-fn main() -> Result<(), eframe::Error> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
@@ -137,12 +187,13 @@ fn main() -> Result<(), eframe::Error> {
         viewport: egui::ViewportBuilder::default().with_inner_size([2400.0, 400.0]),
         ..Default::default()
     };
-    
+
     eframe::run_native(
         "OXY Real-time Graph",
         options,
-        Box::new(|_cc| Box::new(BlePlotApp::new(rx))), // Remove Result wrapping for eframe 0.27
-    )
+        Box::new(move |_cc| Box::new(BlePlotApp::new(rx))), // Remove Result wrapping for eframe 0.27
+    );
+    Ok(())
 }
 
 // ----------------------------------------------------------------------------
